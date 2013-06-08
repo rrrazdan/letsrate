@@ -9,11 +9,11 @@ module Letsrate
         r.rater_id = user_id
         r.save!          
       end      
-      update_rate_average(stars, dimension)
     else
-      raise "User has already rated."                       
+      rates(dimension).update_attributes(:stars =>stars,:rater_id=>user_id)
     end
-  end 
+    update_rate_average_existing(stars, dimension)
+  end
   
   def update_rate_average(stars, dimension=nil)
     if average(dimension).nil?
@@ -31,8 +31,15 @@ module Letsrate
       a.qty = a.qty + 1
       a.save!
     end   
-  end                               
-  
+  end
+
+  def update_rate_average(stars, dimension=nil)
+    a = average(dimension)
+    a.avg = (a.avg*a.qty + stars) / (a.qty+1)
+    a.qty = a.qty + 1
+    a.save!
+  end
+
   def average(dimension=nil)
     if dimension.nil?
       self.send "rate_average_without_dimension"
