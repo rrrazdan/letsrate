@@ -33,7 +33,7 @@ module Letsrate
     end   
   end
 
-  def update_rate_average(stars, dimension=nil)
+  def update_rate_average_existing(stars, dimension=nil)
     a = average(dimension)
     a.avg = (a.avg*a.qty + stars) / (a.qty+1)
     a.qty = a.qty + 1
