@@ -12,7 +12,7 @@ module Letsrate
     else
       rate_object(user_id,dimension).update_attributes(:stars =>stars,:rater_id=>user_id)
     end
-    update_rate_average_existing(stars, dimension)
+    update_rate_average_existing(rate_object(user_id,dimension).stars,stars, dimension)
   end
   
   def update_rate_average(stars, dimension=nil)
@@ -33,11 +33,22 @@ module Letsrate
     end   
   end
 
-  def update_rate_average_existing(stars, dimension=nil)
-    a = average(dimension)
-    a.avg = (a.avg*a.qty + stars) / (a.qty+1)
-    a.qty = a.qty + 1
-    a.save!
+  def update_rate_average_existing(existing, stars, dimension=nil)
+    if average(dimension).nil?
+      RatingCache.create do |avg|
+        avg.cacheable_id = self.id
+        avg.cacheable_type = self.class.name
+        avg.avg = stars
+        avg.qty = 1
+        avg.dimension = dimension
+        avg.save!
+      end
+    else
+      a = average(dimension)
+      a.avg = (a.avg*a.qty + stars-existing) / (a.qty)
+      a.qty = a.qty + 1
+      a.save!
+    end
   end
 
   def average(dimension=nil)
