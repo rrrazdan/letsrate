@@ -9,11 +9,12 @@ module Letsrate
         r.rater_id = user_id
         r.save!
       end
-    else
+      update_rate_average(stars, dimension)
+      else
       existing_score = rate_object(user_id,dimension).stars
       rate_object(user_id,dimension).update_attributes(:stars =>stars,:rater_id=>user_id)
+      update_rate_average_existing(existing_score ,stars, dimension)
     end
-    update_rate_average_existing(existing_score ,stars, dimension)
   end
 
   def update_rate_average(stars, dimension=nil)
